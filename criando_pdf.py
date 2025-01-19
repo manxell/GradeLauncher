@@ -28,6 +28,8 @@ def fillHeader(to, x, y, text, fs=9):
 
 
 def fillGrades(to, x, y, text, fs=9):
+    if not text:
+        return
     to.setFillColor(colors.red) if int(text) < 6 else to.setFillColor(colors.blue)
     fillHeader(to, x, y, text, fs)
 
@@ -45,8 +47,14 @@ def pdf(*args):
     #caminho para área de trabalho
     desktop_path = Path.home() / "Desktop"
 
+    #destino do arquivo
+    file_name = f"{header[0]}_{header[1]}ano_{header[2]}_{header[3]}_20{header[4]}"
+    file_path = f"{desktop_path}/{file_name}.pdf"
+
     # Crie um arquivo PDF em branco
-    c = canvas.Canvas(f"{desktop_path}/tarjeta.pdf", pagesize=A4)
+    c = canvas.Canvas(file_path, pagesize=A4)
+    if Path(file_path).exists():
+        raise Exception("Arquivo já existente.")
 
     # Defina o título do documento
     c.setTitle("Tarjeta de notas")

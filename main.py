@@ -8,8 +8,8 @@ Layout certo
 """
 
 
-def header(cs=None, turma=None, disc=None, tri=None, ano=None, aulasd=None, aulasp=None):
-    return cs, turma, disc, tri, ano, aulasd, aulasp
+def header(cs=None, turma=None, disc=None, tri=None, year=None, aulasd=None, aulasp=None):
+    return cs, turma, disc, tri, year, aulasd, aulasp
 
 
 def listaNF(nf):
@@ -28,8 +28,7 @@ def xInRange(num):
 
 
 def checkBlankField(vs):
-    if any(not value for value in vs.values()):
-        sg.popup("Campo em branco/Valor Inválido.")
+    return any(not value for value in vs.values())
 
 
 def container(linhas):
@@ -156,17 +155,22 @@ if __name__ == "__main__":
 
         #usando segundo loop pra evitar KeyError
         while janela2:
-        #aqui lança as notas e faltas
+            #aqui lança as notas e faltas
             event, values = main_window.read()
             if event == sg.WIN_CLOSED:
                 break
 
             if event == "lancar":
-                pdf(head, listaNF(values))
-                sg.popup("", "PDF gerado!", button_justification="centered")
+                if checkBlankField(values):
+                    sg.popup("", "Há espaços em branco no arquivo. Continuaremos com a operação.",
+                             button_justification="centered")
+                try:
+                    pdf(head, listaNF(values))
+                    sg.popup("", "PDF gerado!", button_justification="centered")
+                except Exception:
+                    sg.popup("", "Arquivo já existente.",
+                             button_justification="centered")
 
-        # encerra o programa
+            # encerra o programa
             if event == sg.WIN_CLOSED:
                 break
-
-
