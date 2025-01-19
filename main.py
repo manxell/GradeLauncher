@@ -8,8 +8,8 @@ Layout certo
 """
 
 
-def header(curso=None, turma=None, disc=None, tri=None, ano=None, aulasd=None, aulasp=None):
-    return curso, turma, disc, tri, ano, aulasd, aulasp
+def header(cs=None, turma=None, disc=None, tri=None, ano=None, aulasd=None, aulasp=None):
+    return cs, turma, disc, tri, ano, aulasd, aulasp
 
 
 def listaNF(nf):
@@ -70,9 +70,6 @@ if __name__ == "__main__":
 
         [sg.Text("Notas a lançar:"), sg.Input(size=(10, 10), enable_events=True, key="notas_lancadas")],
         #esse input definirá o número de linhas da window2
-
-        [sg.Checkbox("Permitir campos em branco?", default=False, enable_events=True, key="blankspace", disabled=True)],
-        #implementar futuramente
 
         [sg.Push(), sg.Button('Continuar', enable_events=True, key="continuar")]  # button é botão
     ]

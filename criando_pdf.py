@@ -1,6 +1,24 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
 import rotate90 as rt
+from pathlib import Path
+
+
+def fillHeader(to, x, y, text, fs=9):
+    to.setTextOrigin(x, y)
+    to.setFont('Helvetica', fs)
+    to.textLine(text=text)
+
+
+def fillGrades(to, x, y, text, fs=9):
+    to.setFillColor(colors.red) if int(text) < 6 else to.setFillColor(colors.blue)
+    fillHeader(to, x, y, text, fs)
+
+
+def fillAbsents(to, x, y, text, fs=9):
+    to.setFillColor(colors.blue)
+    fillHeader(to, x, y, text, fs)
 
 
 def pdf(*args):
@@ -8,9 +26,11 @@ def pdf(*args):
     header = args[0]
     notas, faltas = args[1]
 
+    #caminho para área de trabalho
+    desktop_path = Path.home() / "Desktop"
 
     # Crie um arquivo PDF em branco
-    c = canvas.Canvas("../Para Testes/exemplo.pdf", pagesize=A4)
+    c = canvas.Canvas(f"{desktop_path}/tarjeta.pdf", pagesize=A4)
 
     # Defina o título do documento
     c.setTitle("Tarjeta de notas")
@@ -40,6 +60,8 @@ def pdf(*args):
     # palavra Turma
     textobject.setTextOrigin(124, 810)
     textobject.textLine(text='Turma')
+
+    #linha da palavra turma
     c.line(142, 810, 162, 810)
 
     """"""""
@@ -51,21 +73,36 @@ def pdf(*args):
     textobject.setTextOrigin(60, 795)
     textobject.textLine(text="Disciplina")
 
+    #linha da disciplina
     c.line(88, 795, 162, 795)
 
     # palavra Mês, próxima linha
     textobject.setTextOrigin(60, 780)
     textobject.textLine(text="Mês")
 
-
+    #linha do mês (trimestre)
     c.line(74, 780, 130, 780)
 
     # palavra "de 20"
     textobject.setTextOrigin(132, 780)
     textobject.textLine(text="de 20")
 
-
+    #linha do ano
     c.line(148, 780, 162, 780)
+
+    """
+    Preenchendo o header
+    """
+    fillHeader(textobject, 79, 811, header[0], 7)
+    fillHeader(textobject, 150, 811, header[1])
+    fillHeader(textobject, 90, 796, header[2])
+    fillHeader(textobject, 77, 781, f'{header[3]} Trimestre')
+    fillHeader(textobject, 150, 781, header[4])
+
+    #aulas dadas e previstas
+    rt.rodarTexto90(c, 179, 88, header[5], 9)
+    rt.rodarTexto90(c, 179, 186, header[6], 9)
+    rt.rodarTexto90(c, 179, 418, header[4], 9)
 
     """""
     Grade. Eventuais erros trazer drawText para o fim daqui 
@@ -126,6 +163,22 @@ def pdf(*args):
 
     textobject.setTextOrigin(81, 750)
     textobject.textLine(text="CONCEITO")
+
+    """
+    Lançando notas
+    """
+    ynotas = 742
+    for i in notas:
+        ynotas -= 12
+        fillGrades(textobject, 94, ynotas, i, 9)
+
+    """
+    Lançando faltas
+    """
+    yfaltas = 742
+    for j in faltas:
+        yfaltas -= 12
+        fillAbsents(textobject, 137, yfaltas, j, 9)
 
     """""
     Textos verticais e assinaturas
