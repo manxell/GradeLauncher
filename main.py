@@ -36,13 +36,12 @@ def container(linhas):
     layout2 = [*[[sg.Input(size=10, key=f"n{j}")] for j in range(1, linhas + 1)]]  #keys adicionadas em notas e faltas
     layout3 = [*[[sg.Input(size=10, key=f"f{k}")] for k in range(1, linhas + 1)]]
     layfinal = [[sg.Column(layout1, key='col1'), sg.Column(layout2, key='col2'), sg.Column(layout3, key='col3')],
-                [sg.Push(), sg.Button("Lançar", key="lancar"), sg.Push()]]
+                [sg.Push(), sg.Button("Lançar", key="lancar"), sg.Button("Voltar", key="voltar"), sg.Push()]]
     return layfinal
 
 
-if __name__ == "__main__":
-    # STEP 1 definir o layout
-    main_layout = [
+def main_layout():
+    return [
         #Curso
         [sg.Text('Curso:'),  # text é o texto mostrado.
          sg.Checkbox("EM", default=False, enable_events=True, key="ckbxEM", disabled=False),
@@ -73,16 +72,21 @@ if __name__ == "__main__":
         [sg.Push(), sg.Button('Continuar', enable_events=True, key="continuar")]  # button é botão
     ]
 
+
+if __name__ == "__main__":
+    # STEP 1 definir o layout
+    #main_layout =
+
     # janela principal
-    main_window = sg.Window('Gerador de tarjeta', main_layout,
+    main_window = sg.Window('Gerador de tarjeta', main_layout(),
                             finalize=True)  #window cria a janela. você dá um título e passa o layout montado
     janela1 = True
     janela2 = False
-
     # STEP3 - o loop que mantém o programa aberto.
     while janela1:
         event, values = main_window.read()
         if event == sg.WIN_CLOSED:
+            janela1 = False
             break
 
         """
@@ -157,20 +161,23 @@ if __name__ == "__main__":
         while janela2:
             #aqui lança as notas e faltas
             event, values = main_window.read()
+
             if event == sg.WIN_CLOSED:
+                janela2 = False
                 break
 
             if event == "lancar":
                 if checkBlankField(values):
-                    sg.popup("", "Há espaços em branco no arquivo. Continuaremos com a operação.",
-                             button_justification="centered")
+                    sg.popup("", "Há espaços em branco no arquivo. Continuaremos com a operação.")
                 try:
                     pdf(head, listaNF(values))
-                    sg.popup("", "PDF gerado!", button_justification="centered")
+                    sg.popup("", "PDF gerado!")
                 except Exception:
-                    sg.popup("", "Arquivo já existente.",
-                             button_justification="centered")
+                    sg.popup("", "Arquivo já existente.")
 
-            # encerra o programa
-            if event == sg.WIN_CLOSED:
-                break
+            if event == "voltar":
+                # Fechar o segundo layout e reabrir o primeiro
+                main_window.close()
+                main_window = sg.Window('Gerador de tarjeta', main_layout(), finalize=True)
+                janela2 = False
+                janela1 = True
