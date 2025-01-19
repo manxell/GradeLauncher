@@ -1,3 +1,5 @@
+import string
+
 import PySimpleGUI as sg
 from criando_pdf import pdf
 
@@ -8,8 +10,8 @@ Layout certo
 """
 
 
-def header(cs=None, turma=None, disc=None, tri=None, year=None, aulasd=None, aulasp=None):
-    return cs, turma, disc, tri, year, aulasd, aulasp
+def header(cs=None, sre=None, lsre=None, disc=None, tri=None, year=None, aulasd=None, aulasp=None):
+    return cs, sre, lsre, disc, tri, year, aulasd, aulasp
 
 
 def listaNF(nf):
@@ -48,9 +50,11 @@ def main_layout():
          sg.Checkbox("EF", default=False, enable_events=True, key="ckbxEF", disabled=False),
          #Turma
          sg.Text('Turma:'),
-         sg.Combo(['1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°'], default_value="Ex: 1°, 2°...", size=(10, 10),
-                  key='serie', enable_events=True,
-                  bind_return_key=True)],
+         sg.Combo(['1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°'], default_value="Ex: 1°, 2°...", size=(5, 10),
+                  key='serie', enable_events=True,bind_return_key=True),
+         sg.Combo(list(string.ascii_uppercase), default_value="A", size=(5, 10),
+                  key='lserie', enable_events=True, bind_return_key=True)
+         ],
         #Disciplina
         [sg.Text('Disciplina:'), sg.Input(default_text="Ex: Português", size=(10, 10), enable_events=True, key="disc")],
         #Trimestre
@@ -80,6 +84,11 @@ if __name__ == "__main__":
     # janela principal
     main_window = sg.Window('Gerador de tarjeta', main_layout(),
                             finalize=True)  #window cria a janela. você dá um título e passa o layout montado
+
+    # Variáveis para rastrear o estado anterior das checkboxes
+    estado_ckbxEM_anterior = False
+    estado_ckbxEF_anterior = False
+
     janela1 = True
     janela2 = False
     # STEP3 - o loop que mantém o programa aberto.
@@ -92,30 +101,50 @@ if __name__ == "__main__":
         """
         Aqui vamos preencher a função header
         """
-        #variável curso
+        #variável "Curso", das Checkbox. Uma dor de cabeça.
         curso = None
 
         try:
+            # Define o valor de curso baseado no estado atual das checkboxes
             if values.get("ckbxEM"):
                 curso = "EM"
-                main_window['ckbxEF'].update(disabled=True)
-            else:
-                main_window['ckbxEF'].update(disabled=False)
-
-            if values.get("ckbxEF"):
+            elif values.get("ckbxEF"):
                 curso = "EF"
-                main_window['ckbxEM'].update(disabled=True)
             else:
-                main_window['ckbxEM'].update(disabled=False)
-        except TypeError:
-            pass
-        except AttributeError:
+                curso = ''  # Nenhuma das checkboxes está selecionada
+
+            # Verifica mudanças no estado da checkbox "EM"
+            if values.get("ckbxEM") != estado_ckbxEM_anterior:
+                estado_ckbxEM_anterior = values.get("ckbxEM")
+                if estado_ckbxEM_anterior:
+                    main_window['ckbxEF'].update(disabled=True)
+                    main_window['serie'].update(values=["1°", "2°", "3°"])
+                else:
+                    main_window['ckbxEF'].update(disabled=False)
+                    main_window['serie'].update(values=['1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°'])
+
+            # Verifica mudanças no estado da checkbox "EF"
+            if values.get("ckbxEF") != estado_ckbxEF_anterior:
+                estado_ckbxEF_anterior = values.get("ckbxEF")
+                if estado_ckbxEF_anterior:
+                    main_window['ckbxEM'].update(disabled=True)
+                    main_window['serie'].update(values=['1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°'])
+                else:
+                    main_window['ckbxEM'].update(disabled=False)
+                    main_window['serie'].update(values=["1°", "2°", "3°"])
+
+        except (TypeError, AttributeError):
             pass
 
         #variavel serie
         serie = None
         if values.get("serie"):
             serie = values["serie"]
+
+        #variavel letradaserie
+        lserie = None
+        if values.get('lserie'):
+            lserie = values.get('lserie')
 
         #variavel disciplina
         disciplina = None
@@ -139,7 +168,7 @@ if __name__ == "__main__":
         if values['aulas_prev']:
             aulas_prev = values['aulas_prev']
 
-        head = header(curso, serie, disciplina, trimestre, ano, aulas_dadas, aulas_prev)
+        head = header(curso, serie, lserie, disciplina, trimestre, ano, aulas_dadas, aulas_prev)
 
         #aqui tem que lançar os dados básicos
         if event == 'continuar':

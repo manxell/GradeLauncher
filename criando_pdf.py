@@ -48,7 +48,7 @@ def pdf(*args):
     desktop_path = Path.home() / "Desktop"
 
     #destino do arquivo
-    file_name = f"{header[0]}_{header[1]}ano_{header[2]}_{header[3]}_20{header[4]}"
+    file_name = f"{header[0]}_{header[1]}{header[2]}_{header[3]}_{header[4]}_20{header[5]}"
     file_path = f"{desktop_path}/{file_name}.pdf"
 
     # Crie um arquivo PDF em branco
@@ -118,15 +118,16 @@ def pdf(*args):
     Preenchendo o header
     """
     fillHeader(textobject, 79, 811, header[0], 7)
-    fillHeader(textobject, 150, 811, header[1])
-    fillHeader(textobject, 90, 796, header[2])
-    fillHeader(textobject, 77, 781, f'{header[3]} Trimestre')
-    fillHeader(textobject, 150, 781, header[4])
+    fillHeader(textobject, 107, 811, header[1], 9)
+    fillHeader(textobject, 150, 811, header[2])
+    fillHeader(textobject, 90, 796, header[3])
+    fillHeader(textobject, 77, 781, f'{header[4]} Trimestre')
+    fillHeader(textobject, 150, 781, header[5])
 
     #aulas dadas e previstas
-    rodarTexto90(c, 179, 88, header[5], 9)
-    rodarTexto90(c, 179, 186, header[6], 9)
-    rodarTexto90(c, 179, 418, header[4], 9)
+    rodarTexto90(c, 179, 88, header[6], 9)
+    rodarTexto90(c, 179, 186, header[7], 9)
+    rodarTexto90(c, 179, 418, header[5], 9)
 
     """""
     Grade. Eventuais erros trazer drawText para o fim daqui 
