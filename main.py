@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+from criando_pdf import pdf
 
 sg.theme('Dark Grey 13')  # definindo o tema do layout
 
@@ -7,17 +8,34 @@ Layout certo
 """
 
 
+def header(curso=None, turma=None, disc=None, tri=None, ano=None, aulasd=None, aulasp=None):
+    return curso, turma, disc, tri, ano, aulasd, aulasp
+
+
+def listaNF(nf):
+    lnotas = []
+    lfaltas = []
+    for k, v in nf.items():
+        if k[0] == 'n':
+            lnotas.append(v)
+        if k[0] == 'f':
+            lfaltas.append(v)
+    return lnotas, lfaltas
+
+
 def xInRange(num):
-    if num in range(1, 60):
-        return True
-    else:
-        return False
+    return True if num in range(1, 60) else False
+
+
+def checkBlankField(vs):
+    if any(not value for value in vs.values()):
+        sg.popup("Campo em branco/Valor Inválido.")
 
 
 def container(linhas):
     layout1 = [*[[sg.Text(f'{i}')] for i in range(1, linhas + 1)]]
-    layout2 = [*[[sg.Input(size=10)] for j in range(1, linhas + 1)]]
-    layout3 = [*[[sg.Input(size=10)] for k in range(1, linhas + 1)]]
+    layout2 = [*[[sg.Input(size=10, key=f"n{j}")] for j in range(1, linhas + 1)]]  #keys adicionadas em notas e faltas
+    layout3 = [*[[sg.Input(size=10, key=f"f{k}")] for k in range(1, linhas + 1)]]
     layfinal = [[sg.Column(layout1, key='col1'), sg.Column(layout2, key='col2'), sg.Column(layout3, key='col3')],
                 [sg.Push(), sg.Button("Lançar", key="lancar"), sg.Push()]]
     return layfinal
@@ -33,7 +51,7 @@ if __name__ == "__main__":
          #Turma
          sg.Text('Turma:'),
          sg.Combo(['1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°'], default_value="Ex: 1°, 2°...", size=(10, 10),
-                  key='série', enable_events=True,
+                  key='serie', enable_events=True,
                   bind_return_key=True)],
         #Disciplina
         [sg.Text('Disciplina:'), sg.Input(default_text="Ex: Português", size=(10, 10), enable_events=True, key="disc")],
@@ -53,36 +71,105 @@ if __name__ == "__main__":
         [sg.Text("Notas a lançar:"), sg.Input(size=(10, 10), enable_events=True, key="notas_lancadas")],
         #esse input definirá o número de linhas da window2
 
+        [sg.Checkbox("Permitir campos em branco?", default=False, enable_events=True, key="blankspace", disabled=True)],
+        #implementar futuramente
+
         [sg.Push(), sg.Button('Continuar', enable_events=True, key="continuar")]  # button é botão
     ]
 
     # janela principal
     main_window = sg.Window('Gerador de tarjeta', main_layout,
                             finalize=True)  #window cria a janela. você dá um título e passa o layout montado
-    window2 = None
+    janela1 = True
+    janela2 = False
 
     # STEP3 - o loop que mantém o programa aberto.
-    while True:
-        window, event, values = sg.read_all_windows()  # ler todas as janelas abertas
-        # print(window.Title, event, values) if window is not None else None  #ler as janelas desde que não nulas
+    while janela1:
+        event, values = main_window.read()
+        if event == sg.WIN_CLOSED:
+            break
 
-        #verificando se o input é um número válido
+        """
+        Aqui vamos preencher a função header
+        """
+        #variável curso
+        curso = None
+
+        try:
+            if values.get("ckbxEM"):
+                curso = "EM"
+                main_window['ckbxEF'].update(disabled=True)
+            else:
+                main_window['ckbxEF'].update(disabled=False)
+
+            if values.get("ckbxEF"):
+                curso = "EF"
+                main_window['ckbxEM'].update(disabled=True)
+            else:
+                main_window['ckbxEM'].update(disabled=False)
+        except TypeError:
+            pass
+        except AttributeError:
+            pass
+
+        #variavel serie
+        serie = None
+        if values.get("serie"):
+            serie = values["serie"]
+
+        #variavel disciplina
+        disciplina = None
+        if values['disc']:
+            disciplina = values['disc']
+
+        #variavel bimestre, trimestre etc
+        trimestre = None
+        if values['tri']:
+            trimestre = values['tri']
+
+        ano = None
+        if values['ano']:
+            ano = values['ano'][2:]
+
+        aulas_dadas = None
+        if values['aulas_dadas']:
+            aulas_dadas = values['aulas_dadas']
+
+        aulas_prev = None
+        if values['aulas_prev']:
+            aulas_prev = values['aulas_prev']
+
+        head = header(curso, serie, disciplina, trimestre, ano, aulas_dadas, aulas_prev)
+
+        #aqui tem que lançar os dados básicos
         if event == 'continuar':
+            # verificando se o input de número de notas é um número válido
             try:
                 x = int(values["notas_lancadas"])
                 if not xInRange(x):
-                    sg.Popup("Aviso", "Valor Inválido.")
-                else:
-                    window2 = sg.Window("Notas e Faltas", container(x), finalize=True)
+                    sg.popup_error("Valor Inválido.")
+                    continue
+                    #a chamada de uma segunda janela quebra a checkbox
+                main_window.close()
+                main_window = sg.Window("Notas e Faltas", container(x), finalize=True)
+                janela1 = False
+                janela2 = True
             except ValueError:
                 sg.popup("Aviso:", "Campo em branco/Valor Inválido.")
 
-        if event == sg.WIN_CLOSED and window == window2:  #se o usuário fechar essa segunda janela
-            window2.close()
-            window2 = None
-        if event == sg.WIN_CLOSED and window == main_window:
-            break
+        #usando segundo loop pra evitar KeyError
+        while janela2:
+        #aqui lança as notas e faltas
+            event, values = main_window.read()
+            if event == sg.WIN_CLOSED:
+                break
 
-    main_window.close()  #encerra o programa
-    if window2:
-        window2.close()
+            if event == "lancar":
+                pdf(head, listaNF(values))
+                sg.popup("", "PDF gerado!", button_justification="centered")
+
+        # encerra o programa
+            if event == sg.WIN_CLOSED:
+                break
+
+
