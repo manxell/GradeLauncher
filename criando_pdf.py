@@ -1,8 +1,24 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-import rotate90 as rt
+import math
 from pathlib import Path
+
+
+def rodarTexto90(c, a, b, message, fonte=8):
+    text = c.beginText()
+    text.setTextOrigin(100, 100)
+    angle = 90
+    rotation_matrix = \
+        [
+            math.cos(math.radians(angle)), math.sin(math.radians(angle)),  # a, b
+            -math.sin(math.radians(angle)), math.cos(math.radians(angle)),  # c, d
+            a, b  # e, f (deslocamento)
+        ]
+    text.setTextTransform(*rotation_matrix)
+    text.setFont("Helvetica", fonte)
+    text.textLine(message)
+    c.drawText(text)
 
 
 def fillHeader(to, x, y, text, fs=9):
@@ -100,9 +116,9 @@ def pdf(*args):
     fillHeader(textobject, 150, 781, header[4])
 
     #aulas dadas e previstas
-    rt.rodarTexto90(c, 179, 88, header[5], 9)
-    rt.rodarTexto90(c, 179, 186, header[6], 9)
-    rt.rodarTexto90(c, 179, 418, header[4], 9)
+    rodarTexto90(c, 179, 88, header[5], 9)
+    rodarTexto90(c, 179, 186, header[6], 9)
+    rodarTexto90(c, 179, 418, header[4], 9)
 
     """""
     Grade. Eventuais erros trazer drawText para o fim daqui 
@@ -184,25 +200,25 @@ def pdf(*args):
     Textos verticais e assinaturas
     """""
 
-    rt.rodarTexto90(c, 70, 742, "Números")
+    rodarTexto90(c, 70, 742, "Números")
 
     # Assinaturas
-    rt.rodarTexto90(c, 181, 30, "Aulas previstas", 6)
+    rodarTexto90(c, 181, 30, "Aulas previstas", 6)
     c.line(181, 72, 181, 119)
 
-    rt.rodarTexto90(c, 181, 135, "Aulas dadas", 6)
+    rodarTexto90(c, 181, 135, "Aulas dadas", 6)
     c.line(181, 170, 181, 217)
 
-    rt.rodarTexto90(c, 181, 233, "Data", 6)
+    rodarTexto90(c, 181, 233, "Data", 6)
     c.line(181, 247, 181, 277)
 
-    rt.rodarTexto90(c, 181, 280, "de", 6)
+    rodarTexto90(c, 181, 280, "de", 6)
     c.line(181, 288, 181, 388)
 
-    rt.rodarTexto90(c, 181, 392, "de 20", 6)
+    rodarTexto90(c, 181, 392, "de 20", 6)
     c.line(181, 408, 181, 455)
 
-    rt.rodarTexto90(c, 181, 480, "Assinatura do Professor", 6)
+    rodarTexto90(c, 181, 480, "Assinatura do Professor", 6)
     c.line(181, 544, 181, 730)
 
     # drawtext tem que vir ao fim pois ele quem mostrará os textobject na tela
