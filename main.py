@@ -30,7 +30,25 @@ def xInRange(num):
 
 
 def checkBlankField(vs):
-    return any(not value for value in vs.values())
+    if not vs["ckbxEM"] and not vs["ckbxEF"]:
+        return sg.popup("", "Há espaços em branco no arquivo. Continuaremos com a operação.")
+    for k, v in vs.items():
+        if k in ['ckbxEM', 'ckbxEF']:
+            continue
+        if not v:
+            return sg.popup("", "Há espaços em branco no arquivo. Continuaremos com a operação.")
+    return
+
+
+def checkBlankGrades(vs):
+    if any(not value for value in vs.values()):
+        return sg.popup("", "Há espaços em branco no arquivo. Continuaremos com a operação.")
+
+
+def outOfRangeValues(vs):
+    if any(value is None or value == "" for value in vs.values()):
+        return
+    return any(int(value) < 0 or int(value) > 10 for value in vs.values())
 
 
 def container(linhas):
@@ -51,7 +69,7 @@ def main_layout():
          #Turma
          sg.Text('Turma:'),
          sg.Combo(['1°', '2°', '3°', '4°', '5°', '6°', '7°', '8°', '9°'], default_value="Ex: 1°, 2°...", size=(5, 10),
-                  key='serie', enable_events=True,bind_return_key=True),
+                  key='serie', enable_events=True, bind_return_key=True),
          sg.Combo(list(string.ascii_uppercase), default_value="A", size=(5, 10),
                   key='lserie', enable_events=True, bind_return_key=True)
          ],
@@ -172,13 +190,14 @@ if __name__ == "__main__":
 
         #aqui tem que lançar os dados básicos
         if event == 'continuar':
+            #verificando se há valores em branco no primeiro layout
+            checkBlankField(values)
             # verificando se o input de número de notas é um número válido
             try:
                 x = int(values["notas_lancadas"])
                 if not xInRange(x):
-                    sg.popup_error("Valor Inválido.")
+                    sg.popup("Valor Inválido.")
                     continue
-                    #a chamada de uma segunda janela quebra a checkbox
                 main_window.close()
                 main_window = sg.Window("Notas e Faltas", container(x), finalize=True)
                 janela1 = False
@@ -196,13 +215,18 @@ if __name__ == "__main__":
                 break
 
             if event == "lancar":
-                if checkBlankField(values):
-                    sg.popup("", "Há espaços em branco no arquivo. Continuaremos com a operação.")
+                checkBlankGrades(values)
                 try:
-                    pdf(head, listaNF(values))
-                    sg.popup("", "PDF gerado!")
-                except Exception:
-                    sg.popup("", "Arquivo já existente.")
+                    if outOfRangeValues(values):
+                        raise Exception
+                    else:
+                        try:
+                            pdf(head, listaNF(values))
+                            sg.popup("", "PDF gerado!")
+                        except:
+                            sg.popup("", "Arquivo já existente.")
+                except:
+                    sg.Popup("", "Há valores inválidos no seu arquivo. Por favor, corrija.")
 
             if event == "voltar":
                 # Fechar o segundo layout e reabrir o primeiro
