@@ -47,8 +47,21 @@ def pdf(*args):
     #caminho para área de trabalho
     desktop_path = Path.home() / "Desktop"
 
-    #destino do arquivo
-    file_name = f"{header[0]}_{header[1]}{header[2]}_{header[3]}_{header[4]}_20{header[5]}"
+    #modificando nome do arquivo
+    null_name = False
+    x = -1
+    list_file_name = [header[0], header[1], header[2], header[3], header[4], header[5]]
+    for i in list_file_name:
+        x += 1
+        if i is None or i == "":
+            list_file_name[x] = ""
+            null_name = True
+    if null_name:
+        file_name = f"{list_file_name[0]}_{list_file_name[1]}{list_file_name[2]}_{list_file_name[3]}_{list_file_name[4]}_20{list_file_name[5]}"
+    else:
+        file_name = f"{header[0]}_{header[1]}{header[2]}_{header[3]}_{header[4]}_20{header[5]}"
+
+    # destino do arquivo
     file_path = f"{desktop_path}/{file_name}.pdf"
 
     # Crie um arquivo PDF em branco
