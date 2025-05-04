@@ -48,7 +48,7 @@ def checkBlankGrades(vs):
 def outOfRangeValues(vs):
     if any(value is None or value == "" for value in vs.values()):
         return
-    return any(int(value) < 0 or int(value) > 10 for value in vs.values())
+    return any(float(value) < 0 or float(value) > 10 for value in vs.values())
 
 
 def container(linhas):
