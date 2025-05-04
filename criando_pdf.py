@@ -20,7 +20,8 @@ def rodarTexto90(c, a, b, message, fonte=8):
     text.textLine(message)
     c.drawText(text)
 
-
+#fs = fontsize
+#to = textobject
 def fillHeader(to, x, y, text, fs=9):
     to.setTextOrigin(x, y)
     to.setFont('Helvetica', fs)
@@ -30,7 +31,7 @@ def fillHeader(to, x, y, text, fs=9):
 def fillGrades(to, x, y, text, fs=9):
     if not text:
         return
-    to.setFillColor(colors.red) if int(text) < 6 else to.setFillColor(colors.blue)
+    to.setFillColor(colors.red) if float(text) < 6 else to.setFillColor(colors.blue)
     fillHeader(to, x, y, text, fs)
 
 

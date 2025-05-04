@@ -224,7 +224,7 @@ if __name__ == "__main__":
                             pdf(head, listaNF(values))
                             sg.popup("", "PDF gerado!")
                         except:
-                            sg.popup("", "Arquivo já existente.")
+                            sg.popup("", "Houve um erro inesperado. Tente novamente.")
                 except:
                     sg.Popup("", "Há valores inválidos no seu arquivo. Por favor, corrija.")
 
