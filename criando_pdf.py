@@ -22,19 +22,20 @@ def rodarTexto90(c, a, b, message, fonte=8):
 
 #fs = fontsize
 #to = textobject
+#preencher cabeçalhp
 def fillHeader(to, x, y, text, fs=9):
     to.setTextOrigin(x, y)
     to.setFont('Helvetica', fs)
     to.textLine(text=text)
 
-
+#preencher notas
 def fillGrades(to, x, y, text, fs=9):
     if not text:
         return
     to.setFillColor(colors.red) if float(text) < 6 else to.setFillColor(colors.blue)
     fillHeader(to, x, y, text, fs)
 
-
+#preencher ausências
 def fillAbsents(to, x, y, text, fs=9):
     to.setFillColor(colors.blue)
     fillHeader(to, x, y, text, fs)

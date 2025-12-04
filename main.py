@@ -214,19 +214,29 @@ if __name__ == "__main__":
                 janela2 = False
                 break
 
+            # if event == "lancar":
+            #     checkBlankGrades(values)
+            #     try:
+            #         if outOfRangeValues(values):
+            #             raise Exception
+            #         else:
+            #             try:
+            #                 pdf(head, listaNF(values))
+            #                 sg.popup("", "PDF gerado!")
+            #             except:
+            #                 sg.popup("", "Houve um erro inesperado. Tente novamente.")
+            #     except:
+            #         sg.Popup("", "Há valores inválidos no seu arquivo. Por favor, corrija.")
+
             if event == "lancar":
                 checkBlankGrades(values)
+                if outOfRangeValues(values):
+                    sg.Popup("", "Há valores maiores que 10 no seu arquivo. Garanta que são faltas, não notas.")
                 try:
-                    if outOfRangeValues(values):
-                        raise Exception
-                    else:
-                        try:
-                            pdf(head, listaNF(values))
-                            sg.popup("", "PDF gerado!")
-                        except:
-                            sg.popup("", "Houve um erro inesperado. Tente novamente.")
+                    pdf(head, listaNF(values))
+                    sg.popup("", "PDF gerado!")
                 except:
-                    sg.Popup("", "Há valores inválidos no seu arquivo. Por favor, corrija.")
+                    sg.popup("", "Houve um erro inesperado. Tente novamente.")
 
             if event == "voltar":
                 # Fechar o segundo layout e reabrir o primeiro
